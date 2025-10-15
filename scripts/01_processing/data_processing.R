@@ -73,3 +73,4 @@ growth_columns <- merge(first_caps, last_caps, by = c("pit_tag" = "pit_tag")) |>
 
 View(growth_columns)
 
+write_rds(x = growth_columns, file = "data/processed/ray_growth_clean.rds")
