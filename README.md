@@ -7,13 +7,21 @@ The aim of this project is to use southern stingray (Hypanus americanus) recaptu
 
 ## Columns
 pit_tag: character, a unique code associated with each individual which comes from the ray’s Passive Integrated Transponder (PIT) tag
+
 date_first: date, the date the first capture occurred for an individual in Y-M-D format
+
 date_last: date, the date the last capture occurred for an individual in Y-M-D format
+
 dw_first: numeric, the disc width (cm) measurement taken on the date of first capture
+
 dw_last: numeric, the disc width (cm) measurement taken on the date of last capture
+
 date_change_days: numeric, time between first and last capture per individual in days
+
 date_change_years: numeric, time between first and last capture per individual in years
+
 dw_change_cm: numeric, change in disc width (cm) between first and last capture, with negative values removed
+
 growth_rate_cmyear: numeric, individual growth rate in cm per year
 
 ## Project Structure
