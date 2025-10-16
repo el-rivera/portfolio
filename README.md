@@ -2,7 +2,7 @@
 
 ## Description
 
-The aim of this project is to use southern stingray (Hypanus americanus) recapture data from the Bimini Biological Field Station in The Bahamas to ultimately calculate von Bertalanffy growth parameters. Captures occurred between 2015-2020 and include 301 unique individuals, 90 of which were captured at least 2 times. 
+The aim of this project is to use southern stingray (Hypanus americanus) recapture data from the Bimini Biological Field Station in The Bahamas to ultimately calculate von Bertalanffy growth parameters. Captures occurred between 2015-2020 and include 301 unique individuals, 90 of which were captured at least 2 times. In the raw data, each row represents one capture event, while in the cleaned data, each row represents one individual stingray. 
 
 
 ## Columns
