@@ -8,9 +8,9 @@ The aim of this project is to use southern stingray (Hypanus americanus) recaptu
 ## Columns
 pit_tag: character, a unique code associated with each individual which comes from the ray’s Passive Integrated Transponder (PIT) tag
 
-date_first: date, the date the first capture occurred for an individual in Y-M-D format
+date_first: date, the date the first capture occurred for an individual in yyyy-mm-dd format
 
-date_last: date, the date the last capture occurred for an individual in Y-M-D format
+date_last: date, the date the last capture occurred for an individual in yyyy-mm-dd format
 
 dw_first: numeric, the disc width (cm) measurement taken on the date of first capture
 
