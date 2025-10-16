@@ -8,7 +8,10 @@
 #
 # Description: Raw southern stingray capture data from the Bimini Biological
 # Field Station Foundation is cleaned and structured in preparation for
-# growth calculations
+# growth calculations. In the raw data, each row represents one capture event.
+# In the cleaned data, each row represents one individual. Added columns
+# include first and last date, first and last disc width (cm), change in
+# date in days and years, change in disc width, and growth rate in cm/year
 #
 ################################################################################
 
@@ -21,7 +24,7 @@ library(janitor)
 
 ######## Load in raw data using relative path ######
 options(scipen=9999)
-ray_data=read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
+ray_data <- read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
                   na.strings = c("n.a.",""," ",".", "#WERT!", "#DIV/0!", "n.a", "na", "NA"))
 View(ray_data) #starts with 483 obs, 17 cols
 
