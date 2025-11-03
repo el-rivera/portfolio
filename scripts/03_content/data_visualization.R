@@ -34,7 +34,7 @@ p1 <- ggplot(data = ray_data,
        title = "Disc width to growth rate relationship",
        subtitle = "by disc width (cm) at first capture",
        caption = "Southern stingray capture data via Bimini Biological Field Station Foundation,
-       collected 2016-2020 in Bimini Islands, The Bahamas")
+       collected 2015-2020 in Bimini Islands, The Bahamas")
 p1
 
 ### plot 2 (with 2 panels) - Disc width vs growth per year scatterplot by sex
@@ -78,7 +78,7 @@ p3 <- ggplot(ray_data,
        y = "Count",
        title = "Number of individuals captured by sex",
        caption = "Southern stingray capture data via Bimini Biological Field Station Foundation,
-       collected 2016-2020 in Bimini Islands, The Bahamas")
+       collected 2015-2020 in Bimini Islands, The Bahamas")
 p3
 
 ###### export plots to results/img (.png) ######
