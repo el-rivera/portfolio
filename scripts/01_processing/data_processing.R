@@ -24,20 +24,20 @@ library(janitor)
 
 ######## Load in raw data using relative path ######
 options(scipen=9999)
-ray_data <- read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
+ray_data2 <- read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
                   na.strings = c("n.a.",""," ",".", "#WERT!", "#DIV/0!", "n.a", "na", "NA"))
-View(ray_data) #starts with 483 obs, 17 cols
+View(ray_data2) #starts with 483 obs, 17 cols
 
 #change data class for date
-ray_data$Date = as.Date(ray_data$Date)
+ray_data2$Date = as.Date(ray_data2$Date)
 
 ########### clean and prep data ##########
 # create a pipe that will:
-ray_data_cleaned <- ray_data |>
+ray_data_cleaned <- ray_data2 |>
   clean_names() |> # tidy names
   filter(is.na(disney)) |> #"Y"s removed due to non-standardized measurement protocols
   filter(!is.na(dw_cm)) |>  #remove disc width NAs
-  select(c(pit_tag, date, dw_cm)) |> #specify desired columns
+  select(c(pit_tag, sex, date, dw_cm)) |> #specify desired columns
   arrange(pit_tag, date) |>
   group_by(pit_tag) |>
   filter(n()>1)  #removed single captures, now has 231 obs, 4 cols
@@ -61,12 +61,12 @@ View(last_caps)
 # merge first and last caps by pit_tag and add/calculate new columns:
   #change in date (days and years), change in dw, growth in cm/year
 # and remove growth less than 0, and individuals caught less than 90 days apart
-growth_columns <- merge(first_caps, last_caps, by = c("pit_tag" = "pit_tag")) |>
+growth_columns <- merge(first_caps, last_caps, by = c("pit_tag" = "pit_tag", "sex" = "sex")) |>
   rename(date_first = date.x, # rename columns using snake case
          date_last = date.y,
          dw_first = dw_cm.x,
          dw_last = dw_cm.y) |>
-  relocate(pit_tag, date_first, date_last) |> #put cols in a more appealing order
+  relocate(pit_tag, sex, date_first, date_last) |> #put cols in a more appealing order
   mutate(date_change_days = as.numeric(date_last - date_first)) |> #days between captures
   mutate(date_change_years = as.numeric(date_last - date_first)/365) |> #years between captures
   mutate(dw_change_cm = dw_last - dw_first) |> #change in dw
@@ -76,4 +76,4 @@ growth_columns <- merge(first_caps, last_caps, by = c("pit_tag" = "pit_tag")) |>
 
 View(growth_columns)
 
-write_rds(x = growth_columns, file = "data/processed/ray_growth_clean.rds")
+write_rds(x = growth_columns, file = "data/processed/ray_growth_clean2.rds")
