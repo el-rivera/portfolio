@@ -24,16 +24,16 @@ library(janitor)
 
 ######## Load in raw data using relative path ######
 options(scipen=9999)
-ray_data2 <- read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
+ray_data <- read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
                   na.strings = c("n.a.",""," ",".", "#WERT!", "#DIV/0!", "n.a", "na", "NA"))
-View(ray_data2) #starts with 483 obs, 17 cols
+View(ray_data) #starts with 483 obs, 17 cols
 
 #change data class for date
-ray_data2$Date = as.Date(ray_data2$Date)
+ray_data$Date = as.Date(ray_data$Date)
 
 ########### clean and prep data ##########
 # create a pipe that will:
-ray_data_cleaned <- ray_data2 |>
+ray_data_cleaned <- ray_data |>
   clean_names() |> # tidy names
   filter(is.na(disney)) |> #"Y"s removed due to non-standardized measurement protocols
   filter(!is.na(dw_cm)) |>  #remove disc width NAs
