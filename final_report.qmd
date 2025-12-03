@@ -1,0 +1,151 @@
+---
+title: "Southern stingray (*Hypanus americanus*) growth rates in Bimini Islands, The Bahamas from 2015-2020"
+subtitle: "EVR 628 Final Report"
+author: "Elise Rivera Carvan"
+institute: "University of Miami Macdonald Lab & Bimini Biological Field Station Foundation"
+format: html
+---
+
+## Introduction
+
+This document serves as a summary of skills learned and practiced in the Data Management and Visualization course (EVR 628) taught by Dr. Villasenor-Derbez at the University of Miami during the Fall 2025 semester. The data processing and visualization compiled here were performed across various assignments throughout the semester.  
+
+## Objectives
+
+The aim of this project is to use southern stingray (*Hypanus americanus*) recapture data from the Bimini Biological Field Station in The Bahamas to ultimately calculate von Bertalanffy growth parameters for later publication.  
+
+## Data Sources
+
+Southern stingray capture data was collected by staff and volunteer researchers affiliated with the [Bimini Biological Field Station Foundation](https://www.biminisharklab.com), including Elise Rivera. Raw data is organized as one observation per capture event, and includes capture location data, various body measurements, PIT tag number, sex, and date data.
+
+Captures occurred between 2015-2020 and include 301 unique individuals, 90 of which were captured at least 2 times. The raw data contains 483 observations and 17 columns. For the purposes of this project, we were most interested in the following columns:
+
+* date (in yyyy-mm-dd format) 
+
+* disc width (cm, numeric)
+
+* PIT tag (character)
+
+* sex (character)
+
+The raw data can be found in the portfolio/data/raw folder.
+
+## Data Processing
+
+In the raw data, each row represents one capture event, while in the cleaned data, each row represents one individual stingray.
+
+First, raw capture data was cleaned. This included exclusion of individuals that had only been captured once, removal of NAs, as well as the removal of captures between the first and last capture for individuals captured more than two times throughout the study period, or captures that were performed by visiting research groups with unknown or non-standardized measurement methods. 
+
+Next, a new dataframe was created using only the first and last recorded capture for each individual, resulting in one observation per individual. Rays that showed negative growth were removed, as well as rays which were captured less than 90 days apart to account for potential measuring error.
+
+Lastly, change in disc width and change in date columns were used to calculate growth rate in cm/year for each individual. 
+
+Functions used for data processing include clean_names(), filter(), select(), group_by(), arrange(), mutate(), and merge(). These functions are found in the tidyverse and janitor packages. The corresponding script can be found in the portfolio/scripts/01_processing folder.
+
+```{r}
+#| message: false
+#| echo: false
+#| code-fold: true
+####### Load packages ######
+#install.packages("tidyverse")
+library(tidyverse)
+#install.packages("janitor")
+library(janitor)
+#library(EVR628tools)
+
+######## Load in raw data using relative path ######
+options(scipen=9999)
+ray_data <- read.csv("data/raw/RawData06142024.csv", sep=",", header=TRUE,
+                  na.strings = c("n.a.",""," ",".", "#WERT!", "#DIV/0!", "n.a", "na", "NA"))
+View(ray_data) #starts with 483 obs, 17 cols
+
+#change data class for date
+ray_data$Date = as.Date(ray_data$Date)
+
+########### clean and prep data ##########
+# create a pipe that will:
+ray_data_cleaned <- ray_data |>
+  clean_names() |> # tidy names
+  filter(is.na(disney)) |> #"Y"s removed due to non-standardized measurement protocols
+  filter(!is.na(dw_cm)) |>  #remove disc width NAs
+  select(c(pit_tag, sex, date, dw_cm)) |> #specify desired columns
+  arrange(pit_tag, date) |>
+  group_by(pit_tag) |>
+  filter(n()>1)  #removed single captures, now has 231 obs, 4 cols
+View(ray_data_cleaned)
+
+
+############## Add new columns #############
+# Final goal create a df with one line per individual
+# columns needed:
+  #pit tag, first dw, last dw, change in dw,
+  #first date, last date, change in time (days and years), growth rate (cm per year)
+
+# df of first caps only
+first_caps <- ray_data_cleaned[!duplicated(ray_data_cleaned$pit_tag), ]
+View(first_caps)
+# df of last caps only
+last_caps <- ray_data_cleaned[!duplicated(ray_data_cleaned$pit_tag, fromLast = T), ]
+View(last_caps)
+
+# merge first and last caps by pit_tag and add/calculate new columns:
+  #change in date (days and years), change in dw, growth in cm/year
+# and remove growth less than 0, and individuals caught less than 90 days apart
+growth_columns <- merge(first_caps, last_caps, by = c("pit_tag" = "pit_tag", "sex" = "sex")) |>
+  rename(date_first = date.x, # rename columns using snake case
+         date_last = date.y,
+         dw_first = dw_cm.x,
+         dw_last = dw_cm.y) |>
+  relocate(pit_tag, sex, date_first, date_last) |> #put cols in a more appealing order
+  mutate(date_change_days = as.numeric(date_last - date_first)) |> #days between captures
+  mutate(date_change_years = as.numeric(date_last - date_first)/365) |> #years between captures
+  mutate(dw_change_cm = dw_last - dw_first) |> #change in dw
+  filter(dw_change_cm >= 0, #remove negative dw_change
+         date_change_days > 90) |>  # and caps <90 days apart
+  mutate(growth_rate_cmyear = dw_change_cm / date_change_years) #calculate growth rate
+
+View(growth_columns)
+
+write_rds(x = growth_columns, file = "data/processed/ray_growth_clean2.rds")
+
+```
+
+
+## Main Findings
+
+The figures presented here show the capture locations of all rays in the data, including single and recaptured individuals (Figure 1). Figure 2 shows the relationship between disc width at first capture (cm) and growth rate (cm/year). While it is difficult to see a pattern in the relationship for males due to a small sample size, females seem to show that growth rate decreases as disc width increases. This could indicate that growth occurs more rapidly in smaller, younger, southern stingrays than larger, older stingrays.
+
+Both figures were created using the ggplot2 package. Figure 2 also required use of functions from the cowplot package. The scripts used to create these figures can be found in the portfolio/scripts folder.
+
+### Capture Locations
+
+![Figure 1: Locations of all Southern stingray captures](results/img/mapping_capture_points.png)
+
+
+### Growth Rate
+
+The number of individuals captured at least twice and used for growth calculations was `r length(growth_columns$pit_tag)` (`r  length(which(growth_columns$sex == "f"))` females and `r  length(which(growth_columns$sex == "m"))` males) 
+
+![Figure 2: Growth rate vs disc width relationship by sex (females n = 57; males n = 6)](results/img/dw_vs_growth_by_sex.png)
+
+#### References
+Firke S (2024). _janitor: Simple Tools for Examining and
+  Cleaning Dirty Data_. doi:10.32614/CRAN.package.janitor
+  <https://doi.org/10.32614/CRAN.package.janitor>, R package
+  version 2.2.1, <https://CRAN.R-project.org/package=janitor>.
+
+Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R,
+  Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL,
+  Miller E, Bache SM, Müller K, Ooms J, Robinson D, Seidel DP,
+  Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H
+  (2019). “Welcome to the tidyverse.” _Journal of Open Source
+  Software_, *4*(43), 1686. doi:10.21105/joss.01686
+  <https://doi.org/10.21105/joss.01686>.
+  
+Wickham H. ggplot2: Elegant Graphics for Data Analysis.
+  Springer-Verlag New York, 2016.  
+
+Wilke C (2025). _cowplot: Streamlined Plot Theme and Plot
+  Annotations for 'ggplot2'_. doi:10.32614/CRAN.package.cowplot
+  <https://doi.org/10.32614/CRAN.package.cowplot>, R package
+  version 1.2.0, <https://CRAN.R-project.org/package=cowplot>.
